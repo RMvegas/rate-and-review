@@ -1,216 +1,151 @@
-<!DOCTYPE html>
-<html lang="en">
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
+<html>
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>R&R - Rate & Review</title>
-<style>
-  body { font-family: Arial, sans-serif; background: #f0f2f5; margin: 0; padding: 0; }
-  .header { background: #222; color: #fff; padding: 20px; text-align: center; }
-  .container { max-width: 700px; margin: 20px auto; padding: 0 15px; }
-  h1, h2 { text-align: center; margin: 10px 0; }
-  form { background: #fff; padding: 20px; border-radius: 10px; box-shadow: 0 2px 8px rgba(0,0,0,0.15); margin-bottom: 30px; }
-  label { display: block; margin: 10px 0 5px; font-weight: bold; }
-  input[type="text"], textarea, select { width: 100%; padding: 8px; margin-bottom: 10px; border-radius: 5px; border: 1px solid #ccc; }
-  input[type="file"] { margin-bottom: 10px; }
-  button { background: #222; color: #fff; padding: 10px 20px; border: none; border-radius: 5px; cursor: pointer; }
-  button:hover { background: #555; }
-  .preview img { max-width: 100%; border-radius: 5px; margin-bottom: 10px; }
-  .reviews { margin-top: 20px; }
-  .review-card { background: #fff; padding: 15px; border-radius: 10px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); margin-bottom: 15px; display: flex; align-items: flex-start; }
-  .review-card img { width: 60px; height: 60px; border-radius: 50%; margin-right: 15px; object-fit: cover; }
-  .review-content { flex: 1; }
-  .review-name { font-weight: bold; font-size: 1.1em; }
-  .review-location { font-size: 0.9em; color: #555; margin-bottom: 5px; }
-  .review-text { margin: 5px 0; line-height: 1.4; }
-  .review-stars { color: #f5b50a; margin-bottom: 5px; }
-  .review-time { font-size: 0.85em; color: #777; }
-  .search { margin-bottom: 20px; display: flex; gap: 10px; }
-  .search input { flex: 1; padding: 8px; border-radius: 5px; border: 1px solid #ccc; }
-  .leaderboard { background: #fff; padding: 15px; border-radius: 10px; margin-bottom: 20px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
-  .leaderboard h3 { margin-top: 0; }
-  .leaderboard ul { list-style: none; padding-left: 0; }
-  .leaderboard li { padding: 5px 0; }
-</style>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+  <meta http-equiv="Content-Style-Type" content="text/css">
+  <title></title>
+  <meta name="Generator" content="Cocoa HTML Writer">
+  <meta name="CocoaVersion" content="1561.61">
+  <style type="text/css">
+    p.p1 {margin: 0.0px 0.0px 0.0px 0.0px; font: 12.0px Helvetica}
+    p.p2 {margin: 0.0px 0.0px 0.0px 0.0px; font: 12.0px Helvetica; min-height: 14.0px}
+  </style>
 </head>
 <body>
-
-<div class="header">
-  <h1>R&R - Rate & Review</h1>
-  <p>Share and browse reviews of previous relationships</p>
-</div>
-
-<div class="container">
-
-  <!-- Search -->
-  <div class="search">
-    <input type="text" id="searchName" placeholder="Search by name...">
-    <input type="text" id="searchCity" placeholder="Search by city/state...">
-  </div>
-
-  <!-- Review Form -->
-  <form id="reviewForm">
-    <label for="name">Name of Woman:</label>
-    <input type="text" id="name" name="name" placeholder="Enter her name" required>
-
-    <label for="city">City, State:</label>
-    <input type="text" id="city" name="city" placeholder="Enter city, state" required>
-
-    <label for="review">Review:</label>
-    <textarea id="review" name="review" rows="3" placeholder="Write your review here" required></textarea>
-
-    <label for="stars">Rating:</label>
-    <select id="stars" name="stars" required>
-      <option value="">Select rating</option>
-      <option value="1">★☆☆☆☆</option>
-      <option value="2">★★☆☆☆</option>
-      <option value="3">★★★☆☆</option>
-      <option value="4">★★★★☆</option>
-      <option value="5">★★★★★</option>
-    </select>
-
-    <label for="image">Upload Image:</label>
-    <input type="file" id="image" name="image" accept="image/*">
-    <div class="preview" id="preview"></div>
-
-    <button type="submit">Submit Review</button>
-  </form>
-
-  <!-- Leaderboard for Top Cities -->
-  <div class="leaderboard" id="leaderboard">
-    <h3>Top Cities with Most Reviews</h3>
-    <ul id="cityList">
-      <!-- Dynamically populated -->
-    </ul>
-  </div>
-
-  <!-- Reviews Section -->
-  <div class="reviews" id="reviews">
-    <h2>Recent Reviews</h2>
-  </div>
-</div>
-
-<script>
-const imageInput = document.getElementById('image');
-const preview = document.getElementById('preview');
-const reviewsDiv = document.getElementById('reviews');
-const cityList = document.getElementById('cityList');
-const cityCount = {};
-
-imageInput.addEventListener('change', function() {
-  preview.innerHTML = '';
-  const file = this.files[0];
-  if (file) {
-    const img = document.createElement('img');
-    img.src = URL.createObjectURL(file);
-    preview.appendChild(img);
-  }
-});
-
-function updateLeaderboard() {
-  cityList.innerHTML = '';
-  const sortedCities = Object.entries(cityCount).sort((a,b) => b[1]-a[1]);
-  sortedCities.forEach(([city, count]) => {
-    const li = document.createElement('li');
-    li.textContent = `${city} - ${count} review(s)`;
-    cityList.appendChild(li);
-  });
-}
-
-document.getElementById('reviewForm').addEventListener('submit', function(e) {
-  e.preventDefault();
-
-  const name = document.getElementById('name').value;
-  const city = document.getElementById('city').value;
-  const reviewText = document.getElementById('review').value;
-  const stars = document.getElementById('stars').value;
-  const file = document.getElementById('image').files[0];
-
-  const reviewEl = document.createElement('div');
-  reviewEl.classList.add('review-card');
-
-  const imgEl = document.createElement('img');
-  imgEl.src = file ? URL.createObjectURL(file) : 'https://via.placeholder.com/60';
-  reviewEl.appendChild(imgEl);
-
-  const contentEl = document.createElement('div');
-  contentEl.classList.add('review-content');
-  contentEl.innerHTML = `<div class="review-name">${name}</div>
-                         <div class="review-location">${city}</div>
-                         <div class="review-stars">${'★'.repeat(stars)}${'☆'.repeat(5 - stars)}</div>
-                         <div class="review-text">${reviewText}</div>
-                         <div class="review-time">Just now</div>`;
-
-  reviewEl.appendChild(contentEl);
-
-  // Add new reviews to top
-  reviewsDiv.insertBefore(reviewEl, reviewsDiv.children[1]);
-
-  // Track city count
-  cityCount[city] = cityCount[city] ? cityCount[city]+1 : 1;
-  updateLeaderboard();
-
-  // Reset form
-  document.getElementById('reviewForm').reset();
-  preview.innerHTML = '';
-});
-
-// Search functionality
-const searchName = document.getElementById('searchName');
-const searchCity = document.getElementById('searchCity');
-
-function filterReviews() {
-  const nameVal = searchName.value.toLowerCase();
-  const cityVal = searchCity.value.toLowerCase();
-  const reviewCards = document.querySelectorAll('.review-card');
-
-  reviewCards.forEach(card => {
-    const reviewName = card.querySelector('.review-name').textContent.toLowerCase();
-    const reviewCity = card.querySelector('.review-location').textContent.toLowerCase();
-
-    if (reviewName.includes(nameVal) && reviewCity.includes(cityVal)) {
-      card.style.display = 'flex';
-    } else {
-      card.style.display = 'none';
-    }
-  });
-}
-
-searchName.addEventListener('input', filterReviews);
-searchCity.addEventListener('input', filterReviews);
-
-// Add some mock reviews for demo
-const mockReviews = [
-  {name: 'Jane Doe', city: 'Los Angeles, CA', stars: 5, text: 'Great time!', img: 'https://randomuser.me/api/portraits/women/1.jpg'},
-  {name: 'Lisa Smith', city: 'New York, NY', stars: 4, text: 'Fun but complicated.', img: 'https://randomuser.me/api/portraits/women/2.jpg'},
-  {name: 'Amy Johnson', city: 'Chicago, IL', stars: 3, text: 'Average experience.', img: 'https://randomuser.me/api/portraits/women/3.jpg'}
-];
-
-mockReviews.reverse().forEach(r => {
-  const evt = new Event('submit');
-  document.getElementById('reviewForm').reset();
-  document.getElementById('name').value = r.name;
-  document.getElementById('city').value = r.city;
-  document.getElementById('review').value = r.text;
-  document.getElementById('stars').value = r.stars;
-  const reviewEl = document.createElement('div');
-  reviewEl.classList.add('review-card');
-  const imgEl = document.createElement('img');
-  imgEl.src = r.img;
-  reviewEl.appendChild(imgEl);
-  const contentEl = document.createElement('div');
-  contentEl.classList.add('review-content');
-  contentEl.innerHTML = `<div class="review-name">${r.name}</div>
-                         <div class="review-location">${r.city}</div>
-                         <div class="review-stars">${'★'.repeat(r.stars)}${'☆'.repeat(5 - r.stars)}</div>
-                         <div class="review-text">${r.text}</div>
-                         <div class="review-time">Just now</div>`;
-  reviewEl.appendChild(contentEl);
-  reviewsDiv.insertBefore(reviewEl, reviewsDiv.children[1]);
-  cityCount[r.city] = cityCount[r.city] ? cityCount[r.city]+1 : 1;
-});
-updateLeaderboard();
-</script>
-
+<p class="p1">&lt;!DOCTYPE html&gt;</p>
+<p class="p1">&lt;html lang="en"&gt;</p>
+<p class="p1">&lt;head&gt;</p>
+<p class="p1">&lt;meta charset="UTF-8"&gt;</p>
+<p class="p1">&lt;meta name="viewport" content="width=device-width, initial-scale=1.0"&gt;</p>
+<p class="p1">&lt;title&gt;R&amp;R - Rate and Review&lt;/title&gt;</p>
+<p class="p1">&lt;style&gt;</p>
+<p class="p1"><span class="Apple-converted-space">  </span>body {</p>
+<p class="p1"><span class="Apple-converted-space">    </span>font-family: Arial, sans-serif;</p>
+<p class="p1"><span class="Apple-converted-space">    </span>background-color: #000;</p>
+<p class="p1"><span class="Apple-converted-space">    </span>color: #fff;</p>
+<p class="p1"><span class="Apple-converted-space">    </span>margin: 0;</p>
+<p class="p1"><span class="Apple-converted-space">    </span>padding: 0;</p>
+<p class="p1"><span class="Apple-converted-space">  </span>}</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">  </span>header {</p>
+<p class="p1"><span class="Apple-converted-space">    </span>background-color: #c00; /* red */</p>
+<p class="p1"><span class="Apple-converted-space">    </span>padding: 20px;</p>
+<p class="p1"><span class="Apple-converted-space">    </span>text-align: center;</p>
+<p class="p1"><span class="Apple-converted-space">  </span>}</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">  </span>header h1 {</p>
+<p class="p1"><span class="Apple-converted-space">    </span>color: #ff0; /* yellow */</p>
+<p class="p1"><span class="Apple-converted-space">    </span>margin: 0;</p>
+<p class="p1"><span class="Apple-converted-space">  </span>}</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">  </span>.search-section {</p>
+<p class="p1"><span class="Apple-converted-space">    </span>padding: 20px;</p>
+<p class="p1"><span class="Apple-converted-space">    </span>text-align: center;</p>
+<p class="p1"><span class="Apple-converted-space">    </span>background-color: #222;</p>
+<p class="p1"><span class="Apple-converted-space">  </span>}</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">  </span>.search-section input[type="text"] {</p>
+<p class="p1"><span class="Apple-converted-space">    </span>padding: 10px;</p>
+<p class="p1"><span class="Apple-converted-space">    </span>width: 250px;</p>
+<p class="p1"><span class="Apple-converted-space">    </span>border-radius: 5px;</p>
+<p class="p1"><span class="Apple-converted-space">    </span>border: none;</p>
+<p class="p1"><span class="Apple-converted-space">    </span>margin-right: 10px;</p>
+<p class="p1"><span class="Apple-converted-space">  </span>}</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">  </span>.search-section button {</p>
+<p class="p1"><span class="Apple-converted-space">    </span>padding: 10px 15px;</p>
+<p class="p1"><span class="Apple-converted-space">    </span>background-color: #c00;</p>
+<p class="p1"><span class="Apple-converted-space">    </span>color: #ff0;</p>
+<p class="p1"><span class="Apple-converted-space">    </span>border: none;</p>
+<p class="p1"><span class="Apple-converted-space">    </span>border-radius: 5px;</p>
+<p class="p1"><span class="Apple-converted-space">    </span>cursor: pointer;</p>
+<p class="p1"><span class="Apple-converted-space">  </span>}</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">  </span>.reviews {</p>
+<p class="p1"><span class="Apple-converted-space">    </span>display: flex;</p>
+<p class="p1"><span class="Apple-converted-space">    </span>flex-wrap: wrap;</p>
+<p class="p1"><span class="Apple-converted-space">    </span>justify-content: center;</p>
+<p class="p1"><span class="Apple-converted-space">    </span>padding: 20px;</p>
+<p class="p1"><span class="Apple-converted-space">    </span>gap: 20px;</p>
+<p class="p1"><span class="Apple-converted-space">    </span>background-color: #111;</p>
+<p class="p1"><span class="Apple-converted-space">  </span>}</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">  </span>.card {</p>
+<p class="p1"><span class="Apple-converted-space">    </span>background-color: #222;</p>
+<p class="p1"><span class="Apple-converted-space">    </span>border: 2px solid #c00;</p>
+<p class="p1"><span class="Apple-converted-space">    </span>border-radius: 10px;</p>
+<p class="p1"><span class="Apple-converted-space">    </span>padding: 15px;</p>
+<p class="p1"><span class="Apple-converted-space">    </span>width: 300px;</p>
+<p class="p1"><span class="Apple-converted-space">    </span>box-sizing: border-box;</p>
+<p class="p1"><span class="Apple-converted-space">  </span>}</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">  </span>.card img {</p>
+<p class="p1"><span class="Apple-converted-space">    </span>width: 80px;</p>
+<p class="p1"><span class="Apple-converted-space">    </span>height: 80px;</p>
+<p class="p1"><span class="Apple-converted-space">    </span>border-radius: 50%;</p>
+<p class="p1"><span class="Apple-converted-space">    </span>object-fit: cover;</p>
+<p class="p1"><span class="Apple-converted-space">    </span>display: block;</p>
+<p class="p1"><span class="Apple-converted-space">    </span>margin: 0 auto 10px auto;</p>
+<p class="p1"><span class="Apple-converted-space">  </span>}</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">  </span>.card h2 {</p>
+<p class="p1"><span class="Apple-converted-space">    </span>color: #ff0;</p>
+<p class="p1"><span class="Apple-converted-space">    </span>text-align: center;</p>
+<p class="p1"><span class="Apple-converted-space">    </span>margin: 5px 0;</p>
+<p class="p1"><span class="Apple-converted-space">  </span>}</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">  </span>.card p.city {</p>
+<p class="p1"><span class="Apple-converted-space">    </span>color: #c00;</p>
+<p class="p1"><span class="Apple-converted-space">    </span>text-align: center;</p>
+<p class="p1"><span class="Apple-converted-space">    </span>margin: 5px 0;</p>
+<p class="p1"><span class="Apple-converted-space">    </span>font-weight: bold;</p>
+<p class="p1"><span class="Apple-converted-space">  </span>}</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">  </span>.card p.review {</p>
+<p class="p1"><span class="Apple-converted-space">    </span>text-align: center;</p>
+<p class="p1"><span class="Apple-converted-space">    </span>margin: 10px 0 0 0;</p>
+<p class="p1"><span class="Apple-converted-space">    </span>color: #fff;</p>
+<p class="p1"><span class="Apple-converted-space">  </span>}</p>
+<p class="p2"><br></p>
+<p class="p1">&lt;/style&gt;</p>
+<p class="p1">&lt;/head&gt;</p>
+<p class="p1">&lt;body&gt;</p>
+<p class="p2"><br></p>
+<p class="p1">&lt;header&gt;</p>
+<p class="p1"><span class="Apple-converted-space">  </span>&lt;h1&gt;R&amp;R - Rate and Review&lt;/h1&gt;</p>
+<p class="p1">&lt;/header&gt;</p>
+<p class="p2"><br></p>
+<p class="p1">&lt;div class="search-section"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">  </span>&lt;input type="text" placeholder="Search by name, city, or state"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">  </span>&lt;button&gt;Search&lt;/button&gt;</p>
+<p class="p1">&lt;/div&gt;</p>
+<p class="p2"><br></p>
+<p class="p1">&lt;div class="reviews"&gt;</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">  </span>&lt;div class="card"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">    </span>&lt;img src="https://randomuser.me/api/portraits/women/68.jpg" alt="Jane Doe"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">    </span>&lt;h2&gt;Jane Doe&lt;/h2&gt;</p>
+<p class="p1"><span class="Apple-converted-space">    </span>&lt;p class="city"&gt;Las Vegas, NV&lt;/p&gt;</p>
+<p class="p1"><span class="Apple-converted-space">    </span>&lt;p class="review"&gt;Very kind and fun to be around, but not my type long term.&lt;/p&gt;</p>
+<p class="p1"><span class="Apple-converted-space">  </span>&lt;/div&gt;</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">  </span>&lt;div class="card"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">    </span>&lt;img src="https://randomuser.me/api/portraits/women/65.jpg" alt="Mary Smith"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">    </span>&lt;h2&gt;Mary Smith&lt;/h2&gt;</p>
+<p class="p1"><span class="Apple-converted-space">    </span>&lt;p class="city"&gt;Los Angeles, CA&lt;/p&gt;</p>
+<p class="p1"><span class="Apple-converted-space">    </span>&lt;p class="review"&gt;Outgoing and adventurous. Enjoyed our dates, but clashed on interests.&lt;/p&gt;</p>
+<p class="p1"><span class="Apple-converted-space">  </span>&lt;/div&gt;</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">  </span>&lt;div class="card"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">    </span>&lt;img src="https://randomuser.me/api/portraits/women/66.jpg" alt="Lisa Johnson"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">    </span>&lt;h2&gt;Lisa Johnson&lt;/h2&gt;</p>
+<p class="p1"><span class="Apple-converted-space">    </span>&lt;p class="city"&gt;Phoenix, AZ&lt;/p&gt;</p>
+<p class="p1"><span class="Apple-converted-space">    </span>&lt;p class="review"&gt;Very intelligent, but busy schedule made dating difficult.&lt;/p&gt;</p>
+<p class="p1"><span class="Apple-converted-space">  </span>&lt;/div&gt;</p>
+<p class="p2"><br></p>
+<p class="p1">&lt;/div&gt;</p>
+<p class="p2"><br></p>
+<p class="p1">&lt;/body&gt;</p>
+<p class="p1">&lt;/html&gt;</p>
 </body>
 </html>
